@@ -1,0 +1,144 @@
+version: 2
+
+seeds:
+  - name: affiliates_extended
+    description: "Marketing partners who refer players to our platform"
+    columns:
+      - name: id
+        description: "Unique affiliate ID"
+        tests:
+          - unique
+          - not_null
+      - name: code
+        description: "Affiliate code name"
+      - name: origin
+        description: "Platform where affiliate operates (Discord, etc.)"
+      - name: redeemed_at
+        description: "When the affiliate code was used"
+
+  - name: players_extended
+    description: "All players registered on our platform"
+    columns:
+      - name: id
+        description: "Unique player ID"
+        tests:
+          - unique
+          - not_null
+      - name: affiliate_id
+        description: "Which affiliate referred this player"
+      - name: country_code
+        description: "Player's country (DE, BR, GB, etc.)"
+      - name: is_kyc_approved
+        description: "Has the player completed identity verification?"
+      - name: created_at
+        description: "When the player registered"
+      - name: updated_at
+        description: "When the player info was last updated"
+
+  - name: transactions_extended
+    description: "All financial transactions (deposits and withdrawals)"
+    columns:
+      - name: id
+        description: "Unique transaction ID"
+        tests:
+          - unique
+          - not_null
+      - name: timestamp
+        description: "When the transaction happened"
+      - name: player_id
+        description: "Which player made this transaction"
+      - name: type
+        description: "Deposit or Withdraw"
+      - name: amount
+        description: "How much money was involved"
+
+models:
+  - name: model_1_daily_player_transactions
+    description: "Daily summary of each player's deposits and withdrawals"
+    columns:
+      - name: player_id
+        description: "Player ID"
+        tests:
+          - not_null
+      - name: transaction_date
+        description: "Date of the transactions"
+        tests:
+          - not_null
+      - name: deposits
+        description: "Total deposits for this player on this day"
+        tests:
+          - not_null
+      - name: withdrawals
+        description: "Total withdrawals for this player on this day (negative numbers)"
+        tests:
+          - not_null
+
+  - name: model_2_kyc_discord_deposits
+    description: "Deposit totals by country for verified players from Discord"
+    columns:
+      - name: country_code
+        description: "Country code"
+        tests:
+          - not_null
+      - name: total_deposits_by_country
+        description: "Total money deposited by players from this country"
+      - name: total_deposit_count_by_country
+        description: "How many deposits were made by players from this country"
+
+  - name: model_3_top_three_deposits
+    description: "Each player's three biggest deposits"
+    columns:
+      - name: player_id
+        description: "Player ID"
+        tests:
+          - not_null
+          - unique
+      - name: largest_deposit
+        description: "Player's biggest single deposit"
+        tests:
+          - not_null
+      - name: second_largest_deposit
+        description: "Player's second biggest deposit"
+      - name: third_largest_deposit
+        description: "Player's third biggest deposit"
+
+  - name: model_4_kyc_status_changes
+    description: "KYC approval statistics by country"
+    columns:
+      - name: country_code
+        description: "Country code"
+        tests:
+          - not_null
+      - name: total_players
+        description: "Total number of players from this country"
+      - name: players_ever_approved
+        description: "How many players from this country got KYC approved"
+      - name: players_currently_approved
+        description: "How many players from this country are currently KYC approved"
+      - name: approval_rate_percentage
+        description: "What percentage of players from this country got approved"
+      - name: avg_days_to_approval
+        description: "Average days it takes for players from this country to get approved"
+
+snapshots:
+  - name: player_kyc_status_snapshot
+    description: "Historical record of when players got KYC approved or rejected"
+    columns:
+      - name: id
+        description: "Player ID"
+        tests:
+          - not_null
+      - name: is_kyc_approved
+        description: "Was the player KYC approved at this point in time?"
+      - name: created_at
+        description: "When the player first registered"
+      - name: updated_at
+        description: "When this record was last updated"
+      - name: dbt_scd_id
+        description: "Unique ID for this snapshot record"
+      - name: dbt_updated_at
+        description: "When this snapshot was created"
+      - name: dbt_valid_from
+        description: "When this version became valid"
+      - name: dbt_valid_to
+        description: "When this version became invalid (null means current)"
