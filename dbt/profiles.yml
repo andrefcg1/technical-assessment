@@ -9,4 +9,18 @@ technical_assessment:
       threads: 1
       type: postgres
       user: airflow
-  target: dev
+    duckdb:
+      type: duckdb
+      path: 'analytics.duckdb'
+      schema: main
+    bigquery:
+      type: bigquery
+      method: service-account
+      keyfile: "/home/airflow/gcs/dags/dbt/validation-account.json"
+      project: "assessment-project-aeta"
+      execution_project: "assessment-project-aeta"
+      dataset: "technical_assessment"
+      location: "US"
+      threads: 4
+      priority: interactive
+  target: bigquery

@@ -1,114 +1,100 @@
-# Ancient Gaming Data Team Technical Assessment
-This repository contains a boilerplate code structure to help you with the Data Team Technical Assessment.
+# Technical Assessment - dbt + BigQuery + Google Cloud Composer
 
-**ATTENTION: DO NOT CLONE THIS REPOSITORY; INSTEAD FORK IT.**
+This repository contains a complete data pipeline implementation using dbt, BigQuery, and Google Cloud Composer for the Technical Assessment.
 
-## Table of contents
-- [1. Pre-requisites](#1-pre-requisites)
-- [2. Project Structure](#2-project-structure)
-- [3. How to execute it](#3-how-to-execute-it)
-- [4. General advice](#4-general-advice)
+## Architecture
 
-## 1. Pre-requisites
-To run this project, you'll need:
+- **dbt**: Data transformation and modeling
+- **BigQuery**: Data warehouse
+- **Google Cloud Composer**: Managed Airflow for orchestration
+- **Python**: Data processing and pipeline automation
 
-1. Git installed and configured on your machine.
-2. [Docker](https://docs.docker.com/engine/install/) installed on your machine.
-3. A code editor like [VSCode](https://code.visualstudio.com/download), [Sublime Text](https://www.sublimetext.com/download) or [PyCharm](https://www.jetbrains.com/pycharm/).
+## Project Structure
 
-## 2. Project Structure
-This project structure is a suggestion. You're free to edit it to your preferences.
-
-The project's directory tree is:
 ```
-├─airflow
-│ ├─dags
-│ │ └pipeline.py
-│ ├─config
-│ │ └.gitkeep
-│ ├─logs
-│ │ └.gitkeep
-│ └─plugins
-│   └.gitkeep
-├─data
-│ ├affiliates.csv
-│ ├players.csv
-│ └transactions.csv
-├─dbt
-│ ├─analyses
-│ │ └.gitkeep
-│ ├─macros
-│ │ └.gitkeep
-│ ├─models
-│ │ └─example
-│ │   ├my_first_dbt_model.sql
-│ │   ├my_second_dbt_model.sql
-│ │   └schema.yml
-│ ├─seeds
-│ │ └.gitkeep
-│ ├─snapshots
-│ │ └.gitkeep
-│ ├─tests
-│ │ └.gitkeep
-│ ├dbt_project.yml
-│ ├profiles.yml
-│ └README.md
-├.gitignore
-├docker-compose.yaml
-├Dockerfile
-├README.md
-└requirements.txt
-```
-Inside the `airflow` folder, you'll find the `dags` folder. That's where you'll need to put the DAGs.
-
-Inside the `data` folder, you'll find the CSVs provided with the sample data for the tables that need to be extended.
-
-Inside the `dbt` folder is where the DBT contents are located. This part was created by running the command `dbt init` and configuring the DB connection. You'll need to edit that part to fit the challenge requests.
-
-The Docker Compose file in this project is a light modification of the one provided by the [Apache Airflow's official documentation](https://airflow.apache.org/docs/apache-airflow/2.11.0/howto/docker-compose/index.html). It was tested and should enable an Airflow environment, a DBT CLI and a Postgres connection in a single environment, exactly what is required for this exercise.
-
-The `.gitkeep` files do nothing. They only exist because you can't commit an empty folder. If you add any file to a folder with this file, you can delete it.
-
-## 3. How to execute it
-Open your terminal at the root folder of this repository and run:
-
-```bash
-docker-compose up airflow-init
+├─airflow/
+│ └─dags/
+│   └─bigquery_pipeline.py          # Main DAG for Cloud Composer
+├─dbt/
+│ ├─models/                         # dbt models
+│ │ ├─model_1_daily_player_transactions.sql
+│ │ ├─model_2_kyc_discord_deposits.sql
+│ │ ├─model_3_top_three_deposits.sql
+│ │ └─schema.yml                    # Model documentation and tests
+│ ├─seeds/                          # CSV data files
+│ │ ├─affiliates_extended.csv
+│ │ ├─players_extended.csv
+│ │ └─transactions_extended.csv
+│ ├─snapshots/                      # dbt snapshots
+│ │ └─player_kyc_status_snapshot.sql
+│ ├─tests/                          # Custom dbt tests
+│ │ ├─test_deposits_are_positive.sql
+│ │ ├─test_kyc_discord_filtering.sql
+│ │ └─test_withdrawals_are_negative.sql
+│ ├─dbt_project.yml                 # dbt project configuration
+│ ├─profiles.yml                    # dbt profiles for BigQuery
+│ └─packages.yml                    # dbt packages (dbt_utils)
+├─README.md
+└─requirements.txt                  # Python dependencies for Composer
 ```
 
-This will create the Airflow image, pull the necessary Docker images, create the database, and set up a user for the Airflow webserver.
+## Quick Start
 
-Then, run the command:
+### Prerequisites
 
-```bash
-docker-compose up
-```
+1. **Google Cloud Project** with the following APIs enabled:
+   - BigQuery API
+   - Cloud Composer API
+   - Cloud Storage API
 
-Wait a few seconds, then go to the local webserver at http://localhost:8080/ and log in with the following credentials:
-- **username:** airflow
-- **password:** airflow
+2. **Service Account** with the following roles:
+   - BigQuery Admin
+   - BigQuery Job User
+   - Storage Admin
+   - Composer Worker
 
-If everything went ok, you should see a DAG called `pipeline`.
+3. **Google Cloud Composer Environment** (Airflow 2.x)
 
-In a separate terminal window, check if DBT is working correctly by running the following command:
 
-```bash
-docker-compose exec airflow-webserver dbt build --project-dir /opt/dbt --profiles-dir /opt/dbt
-```
+## Data Models
 
-If the command ran successfully, you should see a 'Completed successfully' message in green.
+### Seeds (Raw Data)
+- **affiliates_extended**
+- **players_extended**
+- **transactions_extended**
 
-## 4. General advice
-This project structure is a suggestion. You're free to edit it to your preferences, although it's recommended that you follow it to avoid reconfiguring the Docker Compose file.
+### Models
+1. **model_1_daily_player_transactions**: Daily transaction aggregations per player
+2. **model_2_kyc_discord_deposits**: Discord players with KYC approval and deposits per country
+3. **model_3_top_three_deposits**: Top 3 largest deposits per player
 
-When executing any DBT command, be sure to explicitly specify the Project Directory and Profiles Directory. This ensures you can execute commands from any location inside the Docker instance and will help with triggering DBT through Airflow. Both directories are located at `/opt/dbt` inside the Docker container.
+### Snapshots
+- **player_kyc_status_snapshot**: Tracks KYC status changes over time
 
-In summary, if you are inside a Docker container run:
-```bash
-dbt <command> --project-dir /opt/dbt --profiles-dir /opt/dbt
-```
+## Configuration
 
-If you're not inside the container, run:
-```bash
-docker-compose exec airflow-webserver dbt <command> --project-dir /opt/dbt --profiles-dir /opt/dbt
-```
+### dbt Configuration
+- **Target**: BigQuery (`assessment-project-aeta`)
+- **Dataset**: `technical_assessment`
+- **Location**: US
+- **Authentication**: Service Account JSON key
+
+### Airflow DAG
+- **Schedule**: Daily
+- **Tasks**: debug → deps → seed → snapshot → run → test
+
+## Testing
+
+The pipeline includes comprehensive testing:
+
+### dbt Tests
+- **Generic tests**: unique, not_null constraints
+- **Custom tests**: 
+  - Deposits are positive
+  - Withdrawals are negative
+  - KYC Discord filtering logic
+
+### Data Quality
+- Schema validation
+- Data type consistency
+- Business rule validation
