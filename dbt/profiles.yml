@@ -13,4 +13,14 @@ technical_assessment:
       type: duckdb
       path: 'analytics.duckdb'
       schema: main
-  target: dev
+    bigquery:
+      type: bigquery
+      method: service-account
+      keyfile: "/home/airflow/gcs/dags/dbt/validation-account.json"
+      project: "assessment-project-aeta"
+      execution_project: "assessment-project-aeta"
+      dataset: "technical_assessment"
+      location: "US"
+      threads: 4
+      priority: interactive
+  target: bigquery

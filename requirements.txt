@@ -1,2 +1,5 @@
-dbt-postgres==1.9.1
-dbt-duckdb==1.9.6
+dbt-core==1.10.11
+dbt-bigquery==1.10.2
+google-cloud-bigquery>=3.22.0
+pyarrow>=10.0.0
+google-auth-oauthlib>=1.0.0

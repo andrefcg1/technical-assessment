@@ -2,6 +2,20 @@
 dbt/dbt_packages/
 dbt/logs/
 dbt/target/
+dbt/analytics.duckdb
+dbt/package-lock.yml
+
+# Google Cloud Service Account Keys
+*.json
+!dbt/packages.yml
+
+# Airflow
+airflow/logs/
+airflow/dags/__pycache__/
+
+# Local development
+.env
+.env.local
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,windows,linux,macos,virtualenv,pycharm,visualstudiocode,sublimetext,notepadpp
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,windows,linux,macos,virtualenv,pycharm,visualstudiocode,sublimetext,notepadpp
